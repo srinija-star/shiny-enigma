@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.6.1
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           docker_name: 'ghcr.io/zaproxy/zap-stable'
           target: 'http://testphp.vulnweb.com/'
