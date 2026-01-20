@@ -1,0 +1,19 @@
+
+name: OWASP ZAP Security Scan
+on: [push]
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Run OWASP ZAP scan
+        uses: zaproxy/action-baseline@v0.6.1
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          target: 'http://your-webapp-url'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
