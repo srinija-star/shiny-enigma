@@ -1,20 +1,25 @@
 
-name: OWASP ZAP Baseline Scan
+name: ZAP Baseline Scan
 on: [push]
 
 jobs:
-  zap_scan:
+  zap:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: ZAP Baseline Scan
+      - name: Authenticate to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
           docker_name: 'ghcr.io/zaproxy/zap-stable'
           target: 'http://testphp.vulnweb.com/'
           cmd_options: '-a'
-          allow_issue_writing: true
-          fail_action: false
