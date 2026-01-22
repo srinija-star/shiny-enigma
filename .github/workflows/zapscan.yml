@@ -1,21 +1,38 @@
 
-# Run ZAP Baseline Scan using official Docker image
-- name: Run ZAP Baseline Scan
-  run: |
-    docker run --rm --user root -v ${{ github.workspace }}:/zap/wrk/:rw \
-      ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-      -t http://testphp.vulnweb.com \
-      -r testreport.html || true
-    ls -al
-  continue-on-error: true
+name: ZAP Baseline Scan
 
-# Show the generated report in logs
-- name: Print ZAP Report
-  run: cat testreport.html
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
-# Upload the report as an artifact
-- name: Upload ZAP Report
-  uses: actions/upload-artifact@v4
-  with:
-    name: zap-report
-    path: testreport.html
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Run ZAP Baseline Scan using official Docker image
+      - name: Run ZAP Baseline Scan
+        run: |
+          echo "Starting ZAP Baseline Scan..."
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://testphp.vulnweb.com \
+            -r testreport.html || true
+          ls -al
+        continue-on-error: true
+
+      # Show the generated report in logs
+      - name: Print ZAP Report
+        run: cat testreport.html
+
+      # Upload the report as an artifact
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: testreport.html
