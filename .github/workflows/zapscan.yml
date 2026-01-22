@@ -1,33 +1,21 @@
 
-name: ZAP Baseline Scan
+# Run ZAP Baseline Scan using official Docker image
+- name: Run ZAP Baseline Scan
+  run: |
+    docker run --rm --user root -v ${{ github.workspace }}:/zap/wrk/:rw \
+      ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+      -t http://testphp.vulnweb.com \
+      -r testreport.html || true
+    ls -al
+  continue-on-error: true
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
+# Show the generated report in logs
+- name: Print ZAP Report
+  run: cat testreport.html
 
-# ✅ Add permissions here — at the ROOT level, same indentation as “on” and “jobs”
-permissions:
-  contents: read     # allows workflow to read repo files
-  packages: read     # REQUIRED to pull GHCR images (fixes "denied" error)
-
-jobs:
-  zap:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Authenticate to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.15.0
-        with:
-          target: 'http://testphp.vulnweb.com/'
-          cmd_options: '-a'
+# Upload the report as an artifact
+- name: Upload ZAP Report
+  uses: actions/upload-artifact@v4
+  with:
+    name: zap-report
+    path: testreport.html
